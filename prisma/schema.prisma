@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model consulta {
+  id               Int                @id @default(autoincrement())
+  id_funcionario   Int
+  id_medico        Int
+  data_consulta    DateTime           @db.Timestamp(6)
+  id_exame         Int
+  exame            exame              @relation(fields: [id_exame], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  funcionario      funcionario        @relation(fields: [id_funcionario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  medico           medico             @relation(fields: [id_medico], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  emissao_atestado emissao_atestado[]
+}
+
+model emissao_atestado {
+  id          Int      @id @default(autoincrement())
+  id_consulta Int
+  descricao   String
+  consulta    consulta @relation(fields: [id_consulta], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model empresa {
+  id            Int           @id @default(autoincrement())
+  nome_fantasia String        @db.VarChar(100)
+  cnpj          String        @db.VarChar(14)
+  razao_social  String?
+  funcionario   funcionario[]
+}
+
+model exame {
+  id          Int        @id @default(autoincrement())
+  tipo_exame  String     @db.VarChar(100)
+  valor_exame Decimal    @db.Decimal(10, 2)
+  consulta    consulta[]
+}
+
+model funcionario {
+  id         Int        @id @default(autoincrement())
+  nome       String     @db.VarChar(100)
+  cpf        String     @db.VarChar(11)
+  telefone   String     @db.VarChar(11)
+  ocupacao   String?    @db.VarChar(100)
+  id_empresa Int
+  consulta   consulta[]
+  empresa    empresa    @relation(fields: [id_empresa], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model medico {
+  id            Int        @id @default(autoincrement())
+  nome          String     @db.VarChar(100)
+  crm           String     @db.VarChar(100)
+  especialidade String     @db.VarChar(200)
+  consulta      consulta[]
+}
